@@ -1,0 +1,6 @@
+link loadfuncpp
+
+procedure main()
+    hello := loadfuncpp("./hello.so", "hello", 0)
+    write( hello() )
+end
