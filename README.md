@@ -1,11 +1,10 @@
 #ICON-OpenGL 
 
-An attempt to bring [OpenGL](http://en.wikipedia.org/wiki/OpenGL_ES) to the [ICON programming language](http://en.wikipedia.org/wiki/OpenGL_ES#OpenGL_ES_3.0).
-
+An attempt to bring [OpenGL ES](http://en.wikipedia.org/wiki/OpenGL_ES) to the [ICON programming language](http://www.cs.arizona.edu/icon/docs/ipd266.htm).
 
 #Getting Started
 
-Build ICON version 9.5.1: [ICON Homepage](http://www.cs.arizona.edu/icon/v951/build.htm)
+Build ICON version 9.5.1: [Building ICON](http://www.cs.arizona.edu/icon/v951/build.htm)
 
 Install the loadfuncpp from here: [Carl's Loadfuncpp](http://www-users.cs.umn.edu/~carl/loadfuncpp.htm)
 
