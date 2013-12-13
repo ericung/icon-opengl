@@ -1,8 +1,8 @@
-all:	hello.icn hello.so
-	icont hello.icn
+all:	openWindow.icn openWindow.so
+	icont openWindow.icn
 
-hello.so:	hello.cpp
-	g++ -fPIC -shared hello.cpp -o hello.so
+openWindow.so:	openWindow.cpp
+	g++ openWindow.cpp -fPIC -shared -lglfw -lGLEW -lGL -o openWindow.so
 
 clean:
-	rm hello.so hello
+	rm openWindow.so openWindow

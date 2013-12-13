@@ -1,6 +1,6 @@
 #ICON-OpenGL 
 
-An attempt to bring [OpenGL ES](http://en.wikipedia.org/wiki/OpenGL_ES) to the [ICON programming language](http://en.wikipedia.org/wiki/OpenGL_ES#OpenGL_ES_3.0).
+An attempt to bring [OpenGL](http://en.wikipedia.org/wiki/OpenGL_ES) to the [ICON programming language](http://en.wikipedia.org/wiki/OpenGL_ES#OpenGL_ES_3.0).
 
 
 #Getting Started
