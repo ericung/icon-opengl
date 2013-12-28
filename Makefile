@@ -1,8 +1,9 @@
-all:	openWindow.icn openWindow.so
-	icont openWindow.icn
+all:	iconGL.icn iconGL.so
+	icont iconGL.icn
 
-openWindow.so:	openWindow.cpp
-	g++ openWindow.cpp -fPIC -shared -lglfw -lGLEW -lGL -o openWindow.so
+iconGL.so:	iconGL.cpp
+	g++ iconGL.cpp common/loadshader.cpp common/loadbmp.cpp \
+	-fPIC -shared -lglfw -lGLEW -lGL -o iconGL.so
 
 clean:
-	rm openWindow.so openWindow
+	rm iconGL.so iconGL

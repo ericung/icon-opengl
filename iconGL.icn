@@ -1,0 +1,6 @@
+link loadfuncpp
+
+procedure main()
+    hello := loadfuncpp("./iconGL.so", "initGL",  0)
+    write( hello() )
+end
