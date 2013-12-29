@@ -1,5 +1,4 @@
 // Include standard headers
-#include "loadfuncpp.h"
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -83,8 +82,7 @@ void iGLCubeColor(GLfloat* color_buffer, GLfloat color){
     }
 }
 
-//int main( void )
-extern "C" int initGL(value argv[])
+int main( void )
 {
 	// Initialise GLFW
 	if( !glfwInit() )
@@ -114,7 +112,7 @@ extern "C" int initGL(value argv[])
 		return -1;
 	}
 
-	glfwSetWindowTitle( "Tutorial 01" );
+	glfwSetWindowTitle( "IconGL" );
 
 	// Ensure we can capture the escape key being pressed below
 	glfwEnable( GLFW_STICKY_KEYS );
@@ -133,20 +131,17 @@ extern "C" int initGL(value argv[])
 
     GLuint vertexbuffer;
     glGenBuffers(1, &vertexbuffer);
-    glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(g_vertex_buffer_data), g_vertex_buffer_data, GL_STATIC_DRAW);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vertexbuffer);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(g_vertex_buffer_data), g_vertex_buffer_data, GL_STATIC_DRAW);
 
-
-
-    // Generate another cube
+    // Generate a cube geometry
     GLfloat g_vertex_buffer_data2[36*3];
-    iGLCubeGeometry(g_vertex_buffer_data2, 0.25f,-1, 0, 0);
+    iGLCubeGeometry(g_vertex_buffer_data2, 0.25f,2, 0, 0);
 
     GLuint vertexbuffer2;
     glGenBuffers(1, &vertexbuffer2);
-    glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer2);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(g_vertex_buffer_data2), g_vertex_buffer_data2, GL_STATIC_DRAW);
-
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vertexbuffer2);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(g_vertex_buffer_data2), g_vertex_buffer_data2, GL_STATIC_DRAW);
 
     // Generate a material
     GLfloat g_color_buffer_data[36*3];
@@ -154,8 +149,8 @@ extern "C" int initGL(value argv[])
     
     GLuint colorbuffer;
     glGenBuffers(1, &colorbuffer);
-    glBindBuffer(GL_ARRAY_BUFFER, colorbuffer);
-    glBufferData(GL_ARRAY_BUFFER,   sizeof(g_color_buffer_data), 
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, colorbuffer);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER,   sizeof(g_color_buffer_data), 
                                     g_color_buffer_data, GL_STATIC_DRAW);
 
     // Create and compile glsl program from shaders
@@ -187,7 +182,9 @@ extern "C" int initGL(value argv[])
         glUseProgram(programID);
 
         glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &MVP[0][0]);
+
    
+        // gl vertexbuffer
         glEnableVertexAttribArray(0);
         glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
         glVertexAttribPointer(
@@ -199,18 +196,7 @@ extern "C" int initGL(value argv[])
             (void*)0            // array buffer offset
         );
         
-        /*
-        glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer2);
-        glVertexAttribPointer(
-            0,
-            3,                  // size
-            GL_FLOAT,           // type
-            GL_FALSE,           // normalized?
-            0,                  // stride
-            (void*)sizeof(vertexbuffer)            // array buffer offset
-        );
-        */
-
+        // gl color
         glEnableVertexAttribArray(1);
         glBindBuffer(GL_ARRAY_BUFFER, colorbuffer);
         glVertexAttribPointer(
@@ -219,10 +205,24 @@ extern "C" int initGL(value argv[])
             GL_FLOAT,
             GL_FALSE,
             0,
-            (void*)0
+            (void*) 0
         );
 
-/*
+        // Draw the triangle !
+        glDrawArrays(GL_TRIANGLES, 0, 12*3); // Starting from vertex 0; 3 vertices total -> 1 triangle
+         
+        // gl vertexbuffer2
+        glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer2);
+        glVertexAttribPointer(
+            0,
+            3,                  // size
+            GL_FLOAT,           // type
+            GL_FALSE,           // normalized?
+            0,                  // stride
+            (void*)0            // array buffer offset
+        );
+
+        // gl color 2
         glBindBuffer(GL_ARRAY_BUFFER, colorbuffer);
         glVertexAttribPointer(
             1,                      
@@ -230,9 +230,10 @@ extern "C" int initGL(value argv[])
             GL_FLOAT,
             GL_FALSE,
             0,
-            (void*)sizeof(colorbuffer)
+            (void*) 0
         );
-*/
+
+
         // Draw the triangle !
         glDrawArrays(GL_TRIANGLES, 0, 12*3); // Starting from vertex 0; 3 vertices total -> 1 triangle
                          
