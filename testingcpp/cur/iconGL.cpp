@@ -17,6 +17,13 @@ using namespace glm;
 #include "common/loadshader.hpp"
 #include "common/loadbmp.hpp"
 
+class Object{
+public:
+    GLfloat buffer_data[36*3];
+    GLuint buffer;
+    Object* next;
+};
+
 void iGLCubeGeometry(GLfloat* vertex_buffer, GLfloat width, GLfloat x, GLfloat y, GLfloat z){
     GLfloat copy_vertex_buffer[36*3] = {
         -width+x,-width+y,-width+z, // triangle 1 : begin
@@ -74,13 +81,21 @@ void iGLCubeGeometry(GLfloat* vertex_buffer, GLfloat width, GLfloat x, GLfloat y
 
 }
 
-void iGLCubeColor(GLfloat* color_buffer, GLfloat color){
+void iGLCubeColor(GLfloat* color_buffer, GLfloat red, GLfloat green, GLfloat blue){
     GLfloat scale = 1.0f;
-    for (int i=0; i<36*3; i++){
-        color_buffer[i] = color*scale;
+    for (int i=0; i<36*3; i+=3){
+        color_buffer[i] = red*scale;
+        color_buffer[i+1] = green*scale;
+        color_buffer[i+2] = blue*scale;
         scale *= 0.98f;
     }
 }
+
+void iGLBuffer(GLfloat* buffer_data, GLuint* buffer){
+    glGenBuffers(1, buffer);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, *buffer);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(buffer_data), buffer_data, GL_STATIC_DRAW);
+} 
 
 int main( void )
 {
@@ -112,7 +127,7 @@ int main( void )
 		return -1;
 	}
 
-	glfwSetWindowTitle( "IconGL" );
+	glfwSetWindowTitle( "Icon OpenGL" );
 
 	// Ensure we can capture the escape key being pressed below
 	glfwEnable( GLFW_STICKY_KEYS );
@@ -124,29 +139,20 @@ int main( void )
     glGenVertexArrays(1, &VertexArrayID);
     glBindVertexArray(VertexArrayID);
 
-    // Generate a cube geometry
-    GLfloat width = 1.0f;
-    GLfloat g_vertex_buffer_data[36*3];
-    iGLCubeGeometry(g_vertex_buffer_data, width,0, 0, 0);
-
-    GLuint vertexbuffer;
-    glGenBuffers(1, &vertexbuffer);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vertexbuffer);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(g_vertex_buffer_data), g_vertex_buffer_data, GL_STATIC_DRAW);
-
-    // Generate a cube geometry
-    GLfloat g_vertex_buffer_data2[36*3];
-    iGLCubeGeometry(g_vertex_buffer_data2, 0.25f,2, 0, 0);
-
-    GLuint vertexbuffer2;
-    glGenBuffers(1, &vertexbuffer2);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vertexbuffer2);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(g_vertex_buffer_data2), g_vertex_buffer_data2, GL_STATIC_DRAW);
+    Object* cubeGeoms[2];
+    for (int i=0; i<2; i++){
+        cubeGeoms[i] = new Object();
+        iGLCubeGeometry((cubeGeoms[i])->buffer_data, 0.5, i*2, 0.0f, 0.0f);
+        
+        glGenBuffers(1, &((cubeGeoms[i])->buffer));
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, (cubeGeoms[i])->buffer);
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER,   sizeof(cubeGeoms[i]->buffer_data),
+                                                cubeGeoms[i]->buffer_data, GL_STATIC_DRAW); 
+    }
 
     // Generate a material
     GLfloat g_color_buffer_data[36*3];
-    iGLCubeColor(g_color_buffer_data, 0.5f);
-    
+    iGLCubeColor(g_color_buffer_data, 0.2f, 0.8f, 0.1f);
     GLuint colorbuffer;
     glGenBuffers(1, &colorbuffer);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, colorbuffer);
@@ -184,59 +190,37 @@ int main( void )
         glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &MVP[0][0]);
 
    
-        // gl vertexbuffer
-        glEnableVertexAttribArray(0);
-        glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
-        glVertexAttribPointer(
-            0,
-            3,                  // size
-            GL_FLOAT,           // type
-            GL_FALSE,           // normalized?
-            0,                  // stride
-            (void*)0            // array buffer offset
-        );
-        
-        // gl color
-        glEnableVertexAttribArray(1);
-        glBindBuffer(GL_ARRAY_BUFFER, colorbuffer);
-        glVertexAttribPointer(
-            1,                      
-            3,
-            GL_FLOAT,
-            GL_FALSE,
-            0,
-            (void*) 0
-        );
+        for (int i=0; i<2; i++){
+            // gl vertexbuffer
+            glEnableVertexAttribArray(0);
+            glBindBuffer(GL_ARRAY_BUFFER, cubeGeoms[i]->buffer);
 
-        // Draw the triangle !
-        glDrawArrays(GL_TRIANGLES, 0, 12*3); // Starting from vertex 0; 3 vertices total -> 1 triangle
-         
-        // gl vertexbuffer2
-        glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer2);
-        glVertexAttribPointer(
-            0,
-            3,                  // size
-            GL_FLOAT,           // type
-            GL_FALSE,           // normalized?
-            0,                  // stride
-            (void*)0            // array buffer offset
-        );
+            glVertexAttribPointer(
+                0,
+                3,                  // size
+                GL_FLOAT,           // type
+                GL_FALSE,           // normalized?
+                0,                  // stride
+                (void*)0            // array buffer offset
+            );
 
-        // gl color 2
-        glBindBuffer(GL_ARRAY_BUFFER, colorbuffer);
-        glVertexAttribPointer(
-            1,                      
-            3,
-            GL_FLOAT,
-            GL_FALSE,
-            0,
-            (void*) 0
-        );
+            // gl color
+            glEnableVertexAttribArray(1);
+            glBindBuffer(GL_ARRAY_BUFFER, colorbuffer);
+            glVertexAttribPointer(
+                1,                      
+                3,
+                GL_FLOAT,
+                GL_FALSE,
+                0,
+                (void*) 0
+            );
 
-
-        // Draw the triangle !
-        glDrawArrays(GL_TRIANGLES, 0, 12*3); // Starting from vertex 0; 3 vertices total -> 1 triangle
-                         
+            // draw object
+            glDrawArrays(GL_TRIANGLES, 0, 12*3); 
+        }
+                                 
+        // Attrib
         glDisableVertexAttribArray(0);
         glDisableVertexAttribArray(1);
 
