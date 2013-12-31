@@ -91,12 +91,6 @@ void iGLCubeColor(GLfloat* color_buffer, GLfloat red, GLfloat green, GLfloat blu
     }
 }
 
-void iGLBuffer(GLfloat* buffer_data, GLuint* buffer){
-    glGenBuffers(1, buffer);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, *buffer);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(buffer_data), buffer_data, GL_STATIC_DRAW);
-} 
-
 int main( void )
 {
 	// Initialise GLFW

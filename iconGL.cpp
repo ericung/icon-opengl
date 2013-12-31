@@ -17,70 +17,20 @@ using namespace glm;
 // Include shaders
 #include "common/loadshader.hpp"
 #include "common/loadbmp.hpp"
+#include "common/object.hpp"
 
-void iGLCubeGeometry(GLfloat* vertex_buffer, GLfloat width, GLfloat x, GLfloat y, GLfloat z){
-    GLfloat copy_vertex_buffer[36*3] = {
-        -width+x,-width+y,-width+z, // triangle 1 : begin
-        -width+x,-width+y, width+z,
-        -width+x, width+y, width+z, // triangle 1 : end
 
-        width+x, width+y,-width+z, // triangle 2 : begin
-        -width+x,-width+y,-width+z,
-        -width+x, width+y,-width+z, // triangle 2 : end
+void addObject(Object* sceneHead){
+    Object* newObject = new Object();
 
-        width+x,-width+y, width+z,
-        -width+x,-width+y,-width+z,
-        width+x,-width+y,-width+z,
-
-        width+x, width+y,-width+z,
-        width+x,-width+y,-width+z,
-        -width+x,-width+y,-width+z,
-
-        -width+x,-width+y,-width+z,
-        -width+x, width+y, width+z,
-        -width+x, width+y,-width+z,
-
-        width+x,-width+y, width+z,
-        -width+x,-width+y, width+z,
-        -width+x,-width+y,-width+z,
-
-        -width+x, width+y, width+z,
-        -width+x,-width+y, width+z,
-        width+x,-width+y, width+z,
-
-        width+x, width+y, width+z,
-        width+x,-width+y,-width+z,
-        width+x, width+y,-width+z,
-
-        width+x,-width+y,-width+z,
-        width+x, width+y, width+z,
-        width+x,-width+y, width+z,
-
-        width+x, width+y, width+z,
-        width+x, width+y,-width+z,
-        -width+x, width+y,-width+z,
-
-        width+x, width+y, width+z,
-        -width+x, width+y,-width+z,
-        -width+x, width+y, width+z,
-
-        width+x, width+y, width+z,
-        -width+x, width+y, width+z,
-        width+x,-width+y, width+z
-    };
-
-    for (int i=0; i < 36*3; i++){
-        vertex_buffer[i] = copy_vertex_buffer[i]; 
+    Object* iter = sceneHead;
+    int i = 0;
+    while(iter->next != NULL){
+        iter = iter->next;
+        i++;
     }
-
-}
-
-void iGLCubeColor(GLfloat* color_buffer, GLfloat color){
-    GLfloat scale = 1.0f;
-    for (int i=0; i<36*3; i++){
-        color_buffer[i] = color*scale;
-        scale *= 0.98f;
-    }
+    newObject->data = i;
+    iter->next = newObject;
 }
 
 //int main( void )
@@ -114,7 +64,7 @@ extern "C" int initGL(value argv[])
 		return -1;
 	}
 
-	glfwSetWindowTitle( "Tutorial 01" );
+	glfwSetWindowTitle( "Icon OpenGL" );
 
 	// Ensure we can capture the escape key being pressed below
 	glfwEnable( GLFW_STICKY_KEYS );
@@ -125,32 +75,30 @@ extern "C" int initGL(value argv[])
     GLuint VertexArrayID;
     glGenVertexArrays(1, &VertexArrayID);
     glBindVertexArray(VertexArrayID);
-
-    // Generate a cube geometry
-    GLfloat width = 1.0f;
-    GLfloat g_vertex_buffer_data[36*3];
-    iGLCubeGeometry(g_vertex_buffer_data, width,0, 0, 0);
-
-    GLuint vertexbuffer;
-    glGenBuffers(1, &vertexbuffer);
-    glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(g_vertex_buffer_data), g_vertex_buffer_data, GL_STATIC_DRAW);
+    
+    Object* sceneList = new Object();
+    addObject(sceneList);
+    addObject(sceneList);
+    addObject(sceneList);
 
 
-
-    // Generate another cube
-    GLfloat g_vertex_buffer_data2[36*3];
-    iGLCubeGeometry(g_vertex_buffer_data2, 0.25f,-1, 0, 0);
-
-    GLuint vertexbuffer2;
-    glGenBuffers(1, &vertexbuffer2);
-    glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer2);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(g_vertex_buffer_data2), g_vertex_buffer_data2, GL_STATIC_DRAW);
-
+    Object* iter = sceneList;
+    int i = 0;
+    while(iter->next != NULL){
+        iter = iter->next;
+        printf("%d\n", iter->data);
+        iGLCubeGeometry(iter->buffer_data, 0.5, i, 0.0f, 0.0f);
+        
+        glGenBuffers(1, &(iter->buffer));
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, iter->buffer);
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER,   sizeof(iter->buffer_data),
+                                                iter->buffer_data, GL_STATIC_DRAW); 
+        i++;
+    }
 
     // Generate a material
     GLfloat g_color_buffer_data[36*3];
-    iGLCubeColor(g_color_buffer_data, 0.5f);
+    iGLCubeColor(g_color_buffer_data, 0.5f, 0.1f, 0.8f);
     
     GLuint colorbuffer;
     glGenBuffers(1, &colorbuffer);
@@ -188,57 +136,42 @@ extern "C" int initGL(value argv[])
 
         glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &MVP[0][0]);
    
-        glEnableVertexAttribArray(0);
-        glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
-        glVertexAttribPointer(
-            0,
-            3,                  // size
-            GL_FLOAT,           // type
-            GL_FALSE,           // normalized?
-            0,                  // stride
-            (void*)0            // array buffer offset
-        );
-        
-        /*
-        glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer2);
-        glVertexAttribPointer(
-            0,
-            3,                  // size
-            GL_FLOAT,           // type
-            GL_FALSE,           // normalized?
-            0,                  // stride
-            (void*)sizeof(vertexbuffer)            // array buffer offset
-        );
-        */
+        Object* iter = sceneList;
+        while(iter->next != NULL){
+            // iter
+            iter = iter->next;
 
-        glEnableVertexAttribArray(1);
-        glBindBuffer(GL_ARRAY_BUFFER, colorbuffer);
-        glVertexAttribPointer(
-            1,                      
-            3,
-            GL_FLOAT,
-            GL_FALSE,
-            0,
-            (void*)0
-        );
+            // gl vertexbuffer
+            glEnableVertexAttribArray(0);
+            glBindBuffer(GL_ARRAY_BUFFER, iter->buffer);
 
-/*
-        glBindBuffer(GL_ARRAY_BUFFER, colorbuffer);
-        glVertexAttribPointer(
-            1,                      
-            3,
-            GL_FLOAT,
-            GL_FALSE,
-            0,
-            (void*)sizeof(colorbuffer)
-        );
-*/
-        // Draw the triangle !
-        glDrawArrays(GL_TRIANGLES, 0, 12*3); // Starting from vertex 0; 3 vertices total -> 1 triangle
-                         
+            glVertexAttribPointer(
+                0,
+                3,                  // size
+                GL_FLOAT,           // type
+                GL_FALSE,           // normalized?
+                0,                  // stride
+                (void*)0            // array buffer offset
+            );
+
+            // gl color
+            glEnableVertexAttribArray(1);
+            glBindBuffer(GL_ARRAY_BUFFER, colorbuffer);
+            glVertexAttribPointer(
+                1,                      
+                3,
+                GL_FLOAT,
+                GL_FALSE,
+                0,
+                (void*) 0
+            );
+
+            // draw object
+            glDrawArrays(GL_TRIANGLES, 0, 12*3); 
+        }
+                        
         glDisableVertexAttribArray(0);
         glDisableVertexAttribArray(1);
-
 
 		// Swap buffers
 		glfwSwapBuffers();
