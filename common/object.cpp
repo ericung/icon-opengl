@@ -82,3 +82,18 @@ void iGLCubeColor(GLfloat* color_buffer, GLfloat red, GLfloat green, GLfloat blu
         scale *= 0.98f;
     }
 }
+
+void addObject(Object* sceneHead){
+    Object* newObject = new Object();
+
+    Object* iter = sceneHead;
+    int i = 0;
+    while(iter->next != NULL){
+        iter = iter->next;
+        i++;
+    }
+    newObject->data = i;
+    iter->next = newObject;
+}
+
+

@@ -18,20 +18,8 @@ using namespace glm;
 #include "common/loadshader.hpp"
 #include "common/loadbmp.hpp"
 #include "common/object.hpp"
+#include "common/material.hpp"
 
-
-void addObject(Object* sceneHead){
-    Object* newObject = new Object();
-
-    Object* iter = sceneHead;
-    int i = 0;
-    while(iter->next != NULL){
-        iter = iter->next;
-        i++;
-    }
-    newObject->data = i;
-    iter->next = newObject;
-}
 
 //int main( void )
 extern "C" int initGL(value argv[])
@@ -76,35 +64,46 @@ extern "C" int initGL(value argv[])
     glGenVertexArrays(1, &VertexArrayID);
     glBindVertexArray(VertexArrayID);
     
-    Object* sceneList = new Object();
-    addObject(sceneList);
-    addObject(sceneList);
-    addObject(sceneList);
+    // geometry list
+    Object* geoList = new Object();
+    addObject(geoList);
+    addObject(geoList);
+    addObject(geoList);
+    addObject(geoList);
+    addObject(geoList);
 
+    // material list
+    Material* matList = new Material();
+    addMaterial(matList);
 
-    Object* iter = sceneList;
+    Material* iterMat = matList;
+    while(iterMat->next != NULL){
+        iterMat = iterMat->next;
+
+        // Generate a material
+        iGLCubeColor(iterMat->buffer_data, 0.5f, 0.1f, 0.8f);
+        
+        glGenBuffers(1, &(iterMat->buffer));
+        glBindBuffer(GL_ARRAY_BUFFER, iterMat->buffer);
+        glBufferData(GL_ARRAY_BUFFER,   sizeof(iterMat->buffer_data), 
+                                        iterMat->buffer_data, GL_STATIC_DRAW);
+    }
+
+    // 
+    Object* iter = geoList;
     int i = 0;
     while(iter->next != NULL){
         iter = iter->next;
-        printf("%d\n", iter->data);
         iGLCubeGeometry(iter->buffer_data, 0.5, i, 0.0f, 0.0f);
         
         glGenBuffers(1, &(iter->buffer));
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, iter->buffer);
         glBufferData(GL_ELEMENT_ARRAY_BUFFER,   sizeof(iter->buffer_data),
                                                 iter->buffer_data, GL_STATIC_DRAW); 
+        iter->material = matList->next;
+
         i++;
     }
-
-    // Generate a material
-    GLfloat g_color_buffer_data[36*3];
-    iGLCubeColor(g_color_buffer_data, 0.5f, 0.1f, 0.8f);
-    
-    GLuint colorbuffer;
-    glGenBuffers(1, &colorbuffer);
-    glBindBuffer(GL_ARRAY_BUFFER, colorbuffer);
-    glBufferData(GL_ARRAY_BUFFER,   sizeof(g_color_buffer_data), 
-                                    g_color_buffer_data, GL_STATIC_DRAW);
 
     // Create and compile glsl program from shaders
     GLuint programID = LoadShaders( "vs.glsl", "fs.glsl");
@@ -136,7 +135,7 @@ extern "C" int initGL(value argv[])
 
         glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &MVP[0][0]);
    
-        Object* iter = sceneList;
+        Object* iter = geoList;
         while(iter->next != NULL){
             // iter
             iter = iter->next;
@@ -156,7 +155,7 @@ extern "C" int initGL(value argv[])
 
             // gl color
             glEnableVertexAttribArray(1);
-            glBindBuffer(GL_ARRAY_BUFFER, colorbuffer);
+            glBindBuffer(GL_ARRAY_BUFFER, (iter->material)->buffer);
             glVertexAttribPointer(
                 1,                      
                 3,
