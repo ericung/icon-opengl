@@ -21,6 +21,20 @@ using namespace glm;
 #include "common/material.hpp"
 
 
+extern "C" int send(value argv[])
+{
+    if( !argv[1].toString() ){
+        Icon::runerr(103, argv[1]);
+        return FAILED; 
+    }
+
+    safe newname(argv[1]);
+    char* s = value(newname || nullchar);
+    printf("%s", s);
+    return SUCCEEDED;
+}
+
+
 //int main( void )
 extern "C" int initGL(value argv[])
 {

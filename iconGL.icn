@@ -1,6 +1,15 @@
 link loadfuncpp
 
+record object(str)
+
 procedure main()
-    hello := loadfuncpp("./iconGL.so", "initGL",  0)
-    write( hello() )
+
+    send := loadfuncpp("./iconGL.so", "send", 1)
+    bob := object("hello\n")
+    send(bob.str)
+
+
+    initGL := loadfuncpp("./iconGL.so", "initGL",  0)
+    initGL() 
+
 end
