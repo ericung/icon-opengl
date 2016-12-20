@@ -6,7 +6,7 @@ An attempt to bring [OpenGL 3.0](http://en.wikipedia.org/wiki/OpenGL) to the [IC
 
 Build ICON version 9.5.1: [Building ICON](http://www.cs.arizona.edu/icon/v951/build.htm)
 
-Install the loadfuncpp from here: [Carl's Loadfuncpp](http://www-users.cs.umn.edu/~carl/loadfuncpp.htm)
+Install the loadfuncpp from here: [Loadfuncpp](http://www-users.cs.umn.edu/~carl/loadfuncpp.htm)
 
 Remember to set IPATH and FPATH for which the ICON compiler relies on:
 
